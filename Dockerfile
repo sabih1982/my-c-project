@@ -14,7 +14,7 @@ COPY . .
 RUN make clean && make
 
 # Run tests
-RUN make tests
+RUN make test
 
 # Default command
 CMD ["./calculator"]
