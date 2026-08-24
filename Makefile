@@ -9,7 +9,13 @@ $(TARGET): $(SOURCES)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SOURCES)
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) tests/test_runner
 
 test: $(TARGET)
-	./tests/run_tests
+	@echo "🔨 Compiling tests..."
+	$(CC) $(CFLAGS) -o tests/test_runner tests/test_calculator.c calculator.c
+	@echo "🧪 Running tests..."
+	@./tests/test_runner || (echo "❌ Tests failed!" && exit 1)
+	@echo "✅ All tests passed!"
+
+.PHONY: all clean test
