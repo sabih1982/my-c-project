@@ -1,3 +1,0 @@
-#!/bin/bash
-gcc -o test_runner test_calculator.c ../calculator.c
-./test_runner
