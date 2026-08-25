@@ -13,6 +13,11 @@ RUN wget https://github.com/UnitTestBot/UTBotCpp/releases/download/2024.3.0/utbo
     && chmod +x unpack_and_run_utbot.sh \
     && ./unpack_and_run_utbot.sh --install
 
+# Try to find where UTBot was installed
+RUN find /opt -name "utbot" -type f 2>/dev/null || echo "UTBot not found in /opt"
+RUN find /usr -name "utbot" -type f 2>/dev/null || echo "UTBot not found in /usr"
+RUN find / -name "utbot" -type f 2>/dev/null | head -5 || echo "UTBot not found anywhere"
+
 WORKDIR /app
 COPY . .
 RUN make clean && make && make test
