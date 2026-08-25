@@ -20,7 +20,7 @@ RUN wget https://github.com/UnitTestBot/UTBotCpp/releases/download/2024.3.0/utbo
     && tar -xzf utbot_distr.tar.gz \
     && rm utbot_distr.tar.gz \
     && cd utbot_distr \
-    && ./utbot_run_system.sh --install \
+    && chmod +x unpack_and_run_utbot.sh \
     && ln -s /opt/utbot_distr/server-install/utbot /usr/local/bin/utbot
 
 WORKDIR /app
