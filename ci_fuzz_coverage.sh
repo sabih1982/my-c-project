@@ -49,7 +49,7 @@ lcov --capture \
 lcov --remove "$COVERAGE_DIR/coverage.info" \
     '/usr/*' '/utbot_distr/*' '*/tests/*' '*/build/*' '/tmp/*' \
     --output-file "$COVERAGE_DIR/coverage.info" \
-    --ignore-errors gcov,source,graph
+    --ignore-errors unused,gcov,source,graph
 genhtml "$COVERAGE_DIR/coverage.info" \
     --output-directory "$COVERAGE_DIR/html" \
     --title "Calculator Coverage" --legend --show-details
