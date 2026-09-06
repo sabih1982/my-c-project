@@ -5,6 +5,7 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UTBOT="${UTBOT:-/utbot_distr/server-install/utbot}"
 UTBOT_LD_LIBRARY_PATH="${UTBOT_LD_LIBRARY_PATH:-/usr/lib/x86_64-linux-gnu:/usr/lib:/utbot_distr/install/lib:/utbot_distr/debs-install/usr/lib/x86_64-linux-gnu}"
+UTBOT_CPATH="${UTBOT_CPATH:-/utbot_distr/klee/include}"
 BUILD_DIR="$PROJECT_DIR/ci-artifacts/utbot-build"
 TESTS_DIR="$PROJECT_DIR/ci-artifacts/utbot-tests"
 
@@ -43,7 +44,10 @@ cat > "$BUILD_DIR/link_commands.json" <<LINK
 ]
 LINK
 
-env LD_LIBRARY_PATH="$UTBOT_LD_LIBRARY_PATH" "$UTBOT" generate \
+env \
+  LD_LIBRARY_PATH="$UTBOT_LD_LIBRARY_PATH" \
+  CPATH="$UTBOT_CPATH${CPATH:+:$CPATH}" \
+  "$UTBOT" generate \
     --project-path "$PROJECT_DIR" \
     --tests-dir "$TESTS_DIR" \
     --build-dir "$BUILD_DIR" \
