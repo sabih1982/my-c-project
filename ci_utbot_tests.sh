@@ -25,7 +25,11 @@ gcc -Wall -Wextra -std=c11 -g -o calculator main.o calculator.o
 BUILD
 chmod +x "$BUILD_DIR/build.sh"
 
-(cd "$PROJECT_DIR" && bear "$BUILD_DIR/build.sh")
+if bear --help 2>&1 | grep -q -- '--output'; then
+  (cd "$PROJECT_DIR" && bear -- "$BUILD_DIR/build.sh")
+else
+  (cd "$PROJECT_DIR" && bear "$BUILD_DIR/build.sh")
+fi
 cp compile_commands.json "$BUILD_DIR/compile_commands.json"
 
 cat > "$BUILD_DIR/link_commands.json" <<LINK
