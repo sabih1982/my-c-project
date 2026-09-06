@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  build-test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,32 +37,68 @@ jobs:
           grep -Fq "5 * 4 = 20" <<< "$output"
           grep -Fq "10 / 2 = 5" <<< "$output"
 
-      - name: Build and run fuzz target
-        run: |
-          mkdir -p ci-artifacts/fuzz-corpus
-          clang -g -O1 \
-            -fsanitize=fuzzer,address,undefined \
-            -fno-omit-frame-pointer \
-            -fno-sanitize-recover=all \
-            -Isrc/headers \
-            src/source/fuzz_calculator.c src/source/calculator.c \
-            -o ci-artifacts/fuzz_calculator
-          timeout 10s ci-artifacts/fuzz_calculator \
-            -max_total_time=5 \
-            -detect_leaks=0 \
-            ci-artifacts/fuzz-corpus
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: calculator-build
+          path: calculator
+
+  utbot-tests:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install UTBot dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends bear gcc g++ make wget unzip
+
+      - name: Install UTBot
+        run: |
+          wget -q https://github.com/UnitTestBot/UTBotCpp/releases/download/2024.3.0/utbot-release-2024.3.0.zip -O /tmp/utbot.zip
+          unzip -q /tmp/utbot.zip -d /tmp/utbot
+          sudo tar -xf /tmp/utbot/utbot_distr.tar.gz -C /
+          sudo chmod -R a+rx /utbot_distr
+
+      - name: Generate UTBot tests and report
+        run: ./ci_utbot_tests.sh
+
+      - name: Upload UTBot reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: utbot-tests-report
           path: |
-            calculator
-            ci-artifacts/fuzz_calculator
+            ci-artifacts/utbot-tests
+            ci-artifacts/utbot-build
+
+  fuzz-coverage:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install fuzz and coverage tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc clang lcov
+
+      - name: Generate fuzz and coverage reports
+        run: ./ci_fuzz_coverage.sh
+
+      - name: Upload fuzz and coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-coverage-reports
+          path: ci-artifacts/fuzz-coverage
 
   docker:
     runs-on: ubuntu-latest
-    needs: build-test
+    needs: [build, utbot-tests, fuzz-coverage]
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
 
