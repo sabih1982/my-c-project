@@ -48,7 +48,6 @@ jobs:
     needs: build
     env:
       UTBOT: /utbot_distr/server-install/utbot
-      LD_LIBRARY_PATH: /utbot_distr/install/lib:/utbot_distr/debs-install/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu
 
     steps:
       - name: Check out repository
