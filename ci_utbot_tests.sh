@@ -44,6 +44,7 @@ cat > "$BUILD_DIR/link_commands.json" <<LINK
 ]
 LINK
 
+set +e
 env \
   LD_LIBRARY_PATH="$UTBOT_LD_LIBRARY_PATH" \
   CPATH="$UTBOT_CPATH${CPATH:+:$CPATH}" \
@@ -53,6 +54,18 @@ env \
     --build-dir "$BUILD_DIR" \
     project \
     --src-paths src
+utbot_status=$?
+set -e
+
+generated_sources=$(find "$TESTS_DIR" -type f \( -name '*.cpp' -o -name '*.c' \) | wc -l)
+if [[ "$utbot_status" -ne 0 && "$generated_sources" -eq 0 ]]; then
+    echo "UTBot generation failed and produced no test sources." >&2
+    exit "$utbot_status"
+fi
+
+if [[ "$utbot_status" -ne 0 ]]; then
+    echo "WARNING: UTBot returned $utbot_status after generating test sources; preserving generated files."
+fi
 
 test_count=$(find "$TESTS_DIR" -type f | wc -l)
 printf 'Generated UTBot test files: %s\n' "$test_count" | tee "$TESTS_DIR/summary.txt"
