@@ -1,31 +1,14 @@
-version: '3.8'
-
 services:
+  calculator:
+    build: .
+    image: my-c-app:local
+    stdin_open: true
+    tty: true
+
   dev:
     build: .
-    user: utbot:utbot
+    image: my-c-app:dev
     volumes:
-      - .:/app
-      - utbot_data:/home/utbot
-    ports:
-      - "8080:8080"  # Maps container port 8080 to host port 8080
-    command: /bin/bash
-    working_dir: /app
-    environment:
-      - USER=utbot
-      - HOME=/home/utbot
-
-  utbot-server:
-    build: .
-    user: utbot:utbot
-    volumes:
-      - .:/app
-      - utbot_data:/home/utbot
-    ports:
-      - "8080:8080"  # Expose UTBot server
-    working_dir: /opt/utbot_distr
-    command: ./utbot_server_restart.sh
-    restart: unless-stopped
-
-volumes:
-  utbot_data:
+      - .:/workspace
+    working_dir: /workspace
+    entrypoint: ["/bin/bash"]
