@@ -42,6 +42,31 @@ gcc --coverage "$COVERAGE_DIR/main.o" "$COVERAGE_DIR/calculator.o" \
     -o "$COVERAGE_DIR/calculator"
 (cd "$COVERAGE_DIR" && timeout 30s ./calculator >/dev/null) || true
 
+cat > "$COVERAGE_DIR/edge_cases.c" <<'TESTS'
+#include <limits.h>
+#include "calculator.h"
+
+int main(void)
+{
+    (void)add(INT_MAX, 1);
+    (void)add(INT_MIN, -1);
+    (void)subtract(INT_MIN, 1);
+    (void)subtract(INT_MAX, -1);
+    (void)multiply(INT_MAX, 2);
+    (void)multiply(INT_MIN, 2);
+    (void)multiply(INT_MAX, -2);
+    (void)multiply(INT_MIN, -1);
+    (void)divide(1, 0);
+    (void)divide(INT_MIN, -1);
+    return 0;
+}
+TESTS
+
+gcc -Wall -Wextra -std=c11 -O0 -g --coverage -Isrc/headers \
+    "$COVERAGE_DIR/edge_cases.c" "$COVERAGE_DIR/calculator.o" \
+    -o "$COVERAGE_DIR/edge_cases"
+(cd "$COVERAGE_DIR" && ./edge_cases)
+
 lcov --capture \
     --directory "$COVERAGE_DIR" \
     --output-file "$COVERAGE_DIR/coverage.info" \
